@@ -3,8 +3,8 @@ Contributors: ThemeHunk
 Author URI: : https://www.themehunk.com/
 Tags: themehunk, customizer, oneline-lite,Testimonial,Team, service
 Requires at least: 5.0
-Tested up to: 7.0
-Stable tag: 2.8.7
+Tested up to: 7.1
+Stable tag: 2.8.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,10 @@ Just upload the `themehunk-customizer.zip` to the `/wp-content/plugins/` directo
 == Screenshots ==
 
 == Changelog ==
+
+= 2.8.8 =
+Security: Fixed reflected XSS in Shopline quick view popup (shopline_popup_product).
+* Security: Removed unauthenticated access and hardened input sanitization and output escaping in Shopline WooCommerce AJAX handlers.
 
 = 2.8.7 =
 Fix: Elanzalite Recent Post Widget function deprecated issue resolved.

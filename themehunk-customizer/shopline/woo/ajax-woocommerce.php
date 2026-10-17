@@ -3,12 +3,24 @@
 if ( ! function_exists( 'shopline_product_remove' ) ) :
 
 add_action( 'wp_ajax_shopline_product_remove', 'shopline_product_remove' );
-add_action( 'wp_ajax_nopriv_shopline_product_remove', 'shopline_product_remove' );
 function shopline_product_remove() {
+
+  if ( ! current_user_can( 'administrator' ) ) {
+  
+    wp_die( - 1, 403 );
+    
+} 
+check_ajax_referer('shopline_nonce','nonce'); 
+
+    $product_id = isset( $_POST['product_id'] ) ? absint( wp_unslash( $_POST['product_id'] ) ) : 0;
+    if ( ! $product_id ) {
+      die();
+    }
+
     global $woocommerce;
     $cart = $woocommerce->cart;
 foreach ($woocommerce->cart->get_cart() as $cart_item_key => $cart_item){
-    if($cart_item['product_id'] == $_POST['product_id'] ){
+    if( absint( $cart_item['product_id'] ) === $product_id ){
         // Remove product in the cart using  cart_item_key.
         $cart->remove_cart_item($cart_item_key);
         woocommerce_mini_cart();
@@ -22,8 +34,13 @@ endif;
 if ( ! function_exists( 'shopline_product_count_update' ) ) :
 
 add_action( 'wp_ajax_shopline_product_count_update', 'shopline_product_count_update' );
-add_action( 'wp_ajax_nopriv_shopline_product_count_update', 'shopline_product_count_update' );
 function shopline_product_count_update() {
+  if ( ! current_user_can( 'administrator' ) ) {
+  
+    wp_die( - 1, 403 );
+    
+} 
+check_ajax_referer('shopline_nonce','nonce'); 
         global $woocommerce; ?>
         <a href="<?php echo wc_get_cart_url(); ?>" class="cart-contents" ><i class="fa fa-shopping-cart"></i><div class="cart-crl"><?php echo $woocommerce->cart->cart_contents_count; ?></div></a>     
     <?php
@@ -40,11 +57,20 @@ endif;
 if ( ! function_exists( 'shopline_popup_product' ) ) :
 
 add_action('wp_ajax_shopline_popup_product', 'shopline_popup_product');
-add_action( 'wp_ajax_nopriv_shopline_popup_product', 'shopline_popup_product' );
 
 function shopline_popup_product() {
+if ( ! current_user_can( 'administrator' ) ) {
+  
+    wp_die( - 1, 403 );
+    
+} 
+check_ajax_referer('shopline_nonce','nonce'); 
+
    if(isset($_POST['popup'])){
-   $productId = $_POST['popup'];
+   $productId = absint( wp_unslash( $_POST['popup'] ) );
+   if ( ! $productId ) {
+     die();
+   }
 
   
 global $woocommerce;
@@ -78,24 +104,24 @@ $query = new WP_Query( $args );
               // Display the image URL
               $url = wp_get_attachment_url( $attachment_id );
 
-              $img .='<input id="popup-slide-dot-'.$attachment_id.'" type="radio" name="slides" checked>
-        <div style="background-image: url('.$url.');" class="popup-slide slide-'.$attachment_id.'"></div>';
+              $img .='<input id="popup-slide-dot-'.esc_attr( $attachment_id ).'" type="radio" name="slides" checked>
+        <div style="background-image: url('.esc_url( $url ).');" class="popup-slide slide-'.esc_attr( $attachment_id ).'"></div>';
 
-              $label .='<label for="popup-slide-dot-'.$attachment_id.'"></label>';
+              $label .='<label for="popup-slide-dot-'.esc_attr( $attachment_id ).'"></label>';
               // Display Image instead of URL
              // $img .= wp_get_attachment_image($attachment_id, 'full');
 
             }
     else:
 
-      $img .='<input id="popup-slide-dot-'.$productId.'" type="radio" name="slides" checked>
-        <div style="background-image: url('.wc_placeholder_img_src().');" class="popup-slide slide-'.$productId.'"></div>';
-              $label .='<label for="popup-slide-dot-'.$productId.'"></label>';
+      $img .='<input id="popup-slide-dot-'.esc_attr( $productId ).'" type="radio" name="slides" checked>
+        <div style="background-image: url('.esc_url( wc_placeholder_img_src() ).');" class="popup-slide slide-'.esc_attr( $productId ).'"></div>';
+              $label .='<label for="popup-slide-dot-'.esc_attr( $productId ).'"></label>';
 
     endif;
 
      if ($average = $product->get_average_rating()) :
-        $rating =  '<div class="star-rating" title="'.sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average).'"><span style="width:'.( ( $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.$average.'</strong> '.__( 'out of 5', 'woocommerce' ).'</span></div>';
+        $rating =  '<div class="star-rating" title="'.esc_attr( sprintf(__( 'Rated %s out of 5', 'woocommerce' ), $average) ).'"><span style="width:'.esc_attr( ( (float) $average / 5 ) * 100 ) . '%"><strong itemprop="ratingValue" class="rating">'.esc_html( $average ).'</strong> '.esc_html__( 'out of 5', 'woocommerce' ).'</span></div>';
      endif; 
 
       $cart = shopline_add_to_cart_url($product);
@@ -107,8 +133,8 @@ $query = new WP_Query( $args );
   </div>
    <div class="main">
    <div class="head">
-   <h1>'.$title.'</h1>
-      <h2>'.$category.'</h2></div>
+   <h1>'.esc_html( $title ).'</h1>
+      <h2>'.wp_kses_post( $category ).'</h2></div>
     <div class="left">
       <div class="popup-slider-container">
       <div class="popup-menu">
@@ -118,7 +144,7 @@ $query = new WP_Query( $args );
       </div>
     </div>
     <div class="right">
-      <p>'.$excerpt.'</p>'.$rating.shopline_whish_list().'
+      <p>'.wp_kses_post( $excerpt ).'</p>'.$rating.shopline_whish_list().'
       <p class="quantity">Quantity'.shopline_quantity_add_to_cart($product).'</p>
     </div>
   </div>
